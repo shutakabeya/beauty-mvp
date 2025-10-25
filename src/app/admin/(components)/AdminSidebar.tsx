@@ -68,7 +68,7 @@ export default function AdminSidebar() {
         <div className="flex-shrink-0 flex border-t border-gray-200 p-4">
           <button
             onClick={handleSignOut}
-            className="flex-shrink-0 w-full group block"
+            className="flex-shrink-0 w-full group block cursor-pointer"
           >
             <div className="flex items-center">
               <LogOut className="inline-block h-5 w-5 text-gray-400 group-hover:text-gray-500" />

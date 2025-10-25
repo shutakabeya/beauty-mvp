@@ -11,7 +11,7 @@ export default function AdminHeader() {
       <div className="flex h-16 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-0 lg:shadow-none">
         <button
           type="button"
-          className="-m-2.5 p-2.5 text-gray-700 lg:hidden"
+          className="-m-2.5 p-2.5 text-gray-700 lg:hidden cursor-pointer"
           onClick={() => setSidebarOpen(true)}
         >
           <span className="sr-only">サイドバーを開く</span>
@@ -27,7 +27,7 @@ export default function AdminHeader() {
             {/* 通知ベル */}
             <button
               type="button"
-              className="-m-2.5 p-2.5 text-gray-400 hover:text-gray-500"
+              className="-m-2.5 p-2.5 text-gray-400 hover:text-gray-500 cursor-pointer"
             >
               <span className="sr-only">通知を表示</span>
               <Bell className="h-6 w-6" />
