@@ -41,18 +41,18 @@ export default function StateForm({ state, onClose }: StateFormProps) {
   const handleImageUpload = async (file: File) => {
     try {
       setUploading(true)
-      const formData = new FormData()
-      formData.append('file', file)
+      const uploadFormData = new FormData()
+      uploadFormData.append('file', file)
 
       const response = await fetch('/api/upload', {
         method: 'POST',
-        body: formData,
+        body: uploadFormData,
       })
 
       const result = await response.json()
 
       if (result.success) {
-        setFormData({ ...formData, image_url: result.url })
+        setFormData(prev => ({ ...prev, image_url: result.url }))
         setToast({ message: '画像をアップロードしました', type: 'success' })
       } else {
         setToast({ message: result.error || 'アップロードに失敗しました', type: 'error' })
