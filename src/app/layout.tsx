@@ -12,6 +12,17 @@ const notoSansJP = Noto_Sans_JP({
 export const metadata: Metadata = {
   title: "どうなりたいかドリブン - 美容MVP",
   description: "選ぶだけで、あなたに合った美容解決策を提案します。",
+  icons: {
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/icon.png', type: 'image/png', sizes: '32x32' },
+      { url: '/icon.svg', type: 'image/svg+xml' },
+    ],
+    apple: [
+      { url: '/apple-icon.png', sizes: '180x180' },
+    ],
+  },
+  manifest: '/manifest.json',
 };
 
 export default function RootLayout({
