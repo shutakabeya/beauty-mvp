@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Edit, Trash2, Search } from 'lucide-react'
+import { Edit, Trash2, Search, Plus } from 'lucide-react'
 
 interface Column {
   key: string
@@ -14,7 +14,9 @@ interface DataTableProps {
   data: any[]
   onEdit?: (item: any) => void
   onDelete?: (item: any) => void
+  onCreate?: () => void
   searchFields?: string[]
+  createButtonText?: string
 }
 
 export default function DataTable({ 
@@ -22,7 +24,9 @@ export default function DataTable({
   data, 
   onEdit, 
   onDelete, 
-  searchFields = [] 
+  onCreate,
+  searchFields = [],
+  createButtonText = '新規追加'
 }: DataTableProps) {
   const [searchTerm, setSearchTerm] = useState('')
   const [sortField, setSortField] = useState<string | null>(null)
@@ -61,21 +65,35 @@ export default function DataTable({
 
   return (
     <div className="bg-white rounded-lg shadow">
-      {/* 検索バー */}
-      {searchFields.length > 0 && (
-        <div className="p-4 border-b">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <input
-              type="text"
-              placeholder="検索..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
+      {/* ヘッダー（検索バー + 新規追加ボタン） */}
+      <div className="p-4 border-b">
+        <div className="flex justify-between items-center gap-4">
+          {/* 検索バー */}
+          {searchFields.length > 0 && (
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <input
+                type="text"
+                placeholder="検索..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+          )}
+          
+          {/* 新規追加ボタン */}
+          {onCreate && (
+            <button
+              onClick={onCreate}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              <Plus className="w-4 h-4" />
+              {createButtonText}
+            </button>
+          )}
         </div>
-      )}
+      </div>
 
       {/* テーブル */}
       <div className="overflow-x-auto">

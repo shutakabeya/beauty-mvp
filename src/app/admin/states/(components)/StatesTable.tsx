@@ -13,6 +13,7 @@ interface StatesTableProps {
 
 export default function StatesTable({ states }: StatesTableProps) {
   const [editingState, setEditingState] = useState<State | null>(null)
+  const [isCreating, setIsCreating] = useState(false)
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
 
   const columns = [
@@ -44,8 +45,14 @@ export default function StatesTable({ states }: StatesTableProps) {
     }
   }
 
+  const handleCreate = () => {
+    setIsCreating(true)
+    setEditingState(null)
+  }
+
   const handleFormClose = () => {
     setEditingState(null)
+    setIsCreating(false)
   }
 
   return (
@@ -55,10 +62,12 @@ export default function StatesTable({ states }: StatesTableProps) {
         data={states}
         onEdit={handleEdit}
         onDelete={handleDelete}
+        onCreate={handleCreate}
         searchFields={['name', 'description']}
+        createButtonText="状態を追加"
       />
 
-      {editingState && (
+      {(editingState || isCreating) && (
         <StateForm
           state={editingState}
           onClose={handleFormClose}

@@ -14,6 +14,7 @@ interface ProductsTableProps {
 
 export default function ProductsTable({ products, states }: ProductsTableProps) {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
+  const [isCreating, setIsCreating] = useState(false)
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
 
   const columns = [
@@ -45,8 +46,14 @@ export default function ProductsTable({ products, states }: ProductsTableProps) 
     }
   }
 
+  const handleCreate = () => {
+    setIsCreating(true)
+    setEditingProduct(null)
+  }
+
   const handleFormClose = () => {
     setEditingProduct(null)
+    setIsCreating(false)
   }
 
   return (
@@ -56,10 +63,12 @@ export default function ProductsTable({ products, states }: ProductsTableProps) 
         data={products}
         onEdit={handleEdit}
         onDelete={handleDelete}
+        onCreate={handleCreate}
         searchFields={['name', 'brand', 'state_name']}
+        createButtonText="商品を追加"
       />
 
-      {editingProduct && (
+      {(editingProduct || isCreating) && (
         <ProductForm
           product={editingProduct}
           states={states}
