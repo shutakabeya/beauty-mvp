@@ -25,7 +25,7 @@ export default function CategoriesTable({ categories: initialCategories }: Categ
         setCategories(prev => [...prev, result.data])
         setIsCreating(false)
       } else {
-        setError(result.error)
+        setError(result.error || 'エラーが発生しました')
       }
     } catch (error) {
       setError('エラーが発生しました')
@@ -43,7 +43,7 @@ export default function CategoriesTable({ categories: initialCategories }: Categ
         )
         setEditingId(null)
       } else {
-        setError(result.error)
+        setError(result.error || 'エラーが発生しました')
       }
     } catch (error) {
       setError('エラーが発生しました')
@@ -61,7 +61,7 @@ export default function CategoriesTable({ categories: initialCategories }: Categ
       if (result.success) {
         setCategories(prev => prev.filter(cat => cat.id !== id))
       } else {
-        setError(result.error)
+        setError(result.error || 'エラーが発生しました')
       }
     } catch (error) {
       setError('エラーが発生しました')
