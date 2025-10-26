@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
-import { State } from '@/lib/supabase'
+import { useState, useEffect } from 'react'
+import { State, Category } from '@/lib/supabase'
 import { createState, updateState } from '@/lib/admin-actions'
+import { getCategories } from '@/lib/database'
 import { X } from 'lucide-react'
 import Toast from '@/components/admin/Toast'
 
@@ -16,9 +17,52 @@ export default function StateForm({ state, onClose }: StateFormProps) {
     name: state?.name || '',
     description: state?.description || '',
     image_url: state?.image_url || '',
+    category_id: state?.category_id || '',
+    sort_order: state?.sort_order || 0,
   })
+  const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(false)
+  const [uploading, setUploading] = useState(false)
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const cats = await getCategories()
+        setCategories(cats)
+      } catch (error) {
+        console.error('カテゴリの取得に失敗しました:', error)
+      }
+    }
+    fetchCategories()
+  }, [])
+
+  // 画像アップロード処理
+  const handleImageUpload = async (file: File) => {
+    try {
+      setUploading(true)
+      const formData = new FormData()
+      formData.append('file', file)
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      })
+
+      const result = await response.json()
+
+      if (result.success) {
+        setFormData({ ...formData, image_url: result.url })
+        setToast({ message: '画像をアップロードしました', type: 'success' })
+      } else {
+        setToast({ message: result.error || 'アップロードに失敗しました', type: 'error' })
+      }
+    } catch (error) {
+      setToast({ message: 'アップロードに失敗しました', type: 'error' })
+    } finally {
+      setUploading(false)
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -29,6 +73,10 @@ export default function StateForm({ state, onClose }: StateFormProps) {
       form.append('name', formData.name)
       form.append('description', formData.description)
       form.append('image_url', formData.image_url)
+      if (formData.category_id) {
+        form.append('category_id', formData.category_id.toString())
+      }
+      form.append('sort_order', formData.sort_order.toString())
 
       const result = state 
         ? await updateState(state.id, form)
@@ -100,15 +148,84 @@ export default function StateForm({ state, onClose }: StateFormProps) {
 
           <div>
             <label htmlFor="image_url" className="block text-sm font-medium text-gray-700">
-              画像URL
+              画像
+            </label>
+            
+            {/* 画像アップロード */}
+            <div className="mt-1">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0]
+                  if (file) handleImageUpload(file)
+                }}
+                disabled={uploading}
+                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 disabled:opacity-50"
+              />
+              {uploading && (
+                <p className="mt-2 text-sm text-blue-600">アップロード中...</p>
+              )}
+            </div>
+
+            {/* 現在の画像URL（手動入力も可能） */}
+            <div className="mt-2">
+              <input
+                type="url"
+                id="image_url"
+                value={formData.image_url}
+                onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
+                className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                placeholder="画像URL（手動入力も可能）"
+              />
+            </div>
+
+            {/* 画像プレビュー */}
+            {formData.image_url && (
+              <div className="mt-2">
+                <img
+                  src={formData.image_url}
+                  alt="プレビュー"
+                  className="w-20 h-20 object-cover rounded-md border"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none'
+                  }}
+                />
+              </div>
+            )}
+          </div>
+
+          <div>
+            <label htmlFor="category_id" className="block text-sm font-medium text-gray-700">
+              カテゴリ
+            </label>
+            <select
+              id="category_id"
+              value={formData.category_id}
+              onChange={(e) => setFormData({ ...formData, category_id: e.target.value ? parseInt(e.target.value) : '' })}
+              className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="">カテゴリを選択してください</option>
+              {categories.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label htmlFor="sort_order" className="block text-sm font-medium text-gray-700">
+              並び順
             </label>
             <input
-              type="url"
-              id="image_url"
-              value={formData.image_url}
-              onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
+              type="number"
+              id="sort_order"
+              value={formData.sort_order}
+              onChange={(e) => setFormData({ ...formData, sort_order: parseInt(e.target.value) || 0 })}
               className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              placeholder="https://example.com/image.jpg"
+              min="0"
+              placeholder="0"
             />
           </div>
 

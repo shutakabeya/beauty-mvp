@@ -8,12 +8,14 @@ import {
   Package, 
   BarChart3, 
   Settings,
-  LogOut 
+  LogOut,
+  FolderOpen
 } from 'lucide-react'
 import { signOut } from '@/lib/admin-auth'
 
 const navigation = [
   { name: 'ダッシュボード', href: '/admin', icon: LayoutDashboard },
+  { name: 'カテゴリ管理', href: '/admin/categories', icon: FolderOpen },
   { name: '状態管理', href: '/admin/states', icon: Tag },
   { name: '商品管理', href: '/admin/products', icon: Package },
   { name: '分析', href: '/admin/analytics', icon: BarChart3 },

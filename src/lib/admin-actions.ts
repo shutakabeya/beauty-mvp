@@ -5,10 +5,17 @@ import { requireAdmin } from './admin-auth'
 import { z } from 'zod'
 
 // バリデーションスキーマ
+const CategorySchema = z.object({
+  name: z.string().min(1, 'カテゴリ名は必須です').max(50, 'カテゴリ名は50文字以内で入力してください'),
+  sort_order: z.number().min(0, '並び順は0以上で入力してください')
+})
+
 const StateSchema = z.object({
   name: z.string().min(1, '名前は必須です').max(50, '名前は50文字以内で入力してください'),
   description: z.string().optional(),
-  image_url: z.string().url('有効なURLを入力してください').optional().or(z.literal(''))
+  image_url: z.string().url('有効なURLを入力してください').optional().or(z.literal('')),
+  category_id: z.number().optional(),
+  sort_order: z.number().min(0, '並び順は0以上で入力してください')
 })
 
 const ProductSchema = z.object({
@@ -24,6 +31,84 @@ const ProductSchema = z.object({
   status: z.enum(['active', 'hidden']).default('active')
 })
 
+// Categories CRUD
+export async function createCategory(formData: FormData) {
+  try {
+    await requireAdmin()
+
+    const data = {
+      name: formData.get('name') as string,
+      sort_order: parseInt(formData.get('sort_order') as string) || 0,
+    }
+
+    const validatedData = CategorySchema.parse(data)
+
+    const { data: result, error } = await supabase
+      .from('categories')
+      .insert(validatedData)
+      .select()
+      .single()
+
+    if (error) throw error
+
+    return { success: true, data: result }
+  } catch (error) {
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'エラーが発生しました' 
+    }
+  }
+}
+
+export async function updateCategory(id: number, formData: FormData) {
+  try {
+    await requireAdmin()
+
+    const data = {
+      name: formData.get('name') as string,
+      sort_order: parseInt(formData.get('sort_order') as string) || 0,
+    }
+
+    const validatedData = CategorySchema.parse(data)
+
+    const { data: result, error } = await supabase
+      .from('categories')
+      .update(validatedData)
+      .eq('id', id)
+      .select()
+      .single()
+
+    if (error) throw error
+
+    return { success: true, data: result }
+  } catch (error) {
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'エラーが発生しました' 
+    }
+  }
+}
+
+export async function deleteCategory(id: number) {
+  try {
+    await requireAdmin()
+
+    const { error } = await supabase
+      .from('categories')
+      .delete()
+      .eq('id', id)
+
+    if (error) throw error
+
+    return { success: true }
+  } catch (error) {
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'エラーが発生しました' 
+    }
+  }
+}
+
 // States CRUD
 export async function createState(formData: FormData) {
   try {
@@ -33,6 +118,8 @@ export async function createState(formData: FormData) {
       name: formData.get('name') as string,
       description: formData.get('description') as string,
       image_url: formData.get('image_url') as string,
+      category_id: formData.get('category_id') ? parseInt(formData.get('category_id') as string) : undefined,
+      sort_order: parseInt(formData.get('sort_order') as string) || 0,
     }
 
     const validatedData = StateSchema.parse(data)
@@ -62,6 +149,8 @@ export async function updateState(id: number, formData: FormData) {
       name: formData.get('name') as string,
       description: formData.get('description') as string,
       image_url: formData.get('image_url') as string,
+      category_id: formData.get('category_id') ? parseInt(formData.get('category_id') as string) : undefined,
+      sort_order: parseInt(formData.get('sort_order') as string) || 0,
     }
 
     const validatedData = StateSchema.parse(data)

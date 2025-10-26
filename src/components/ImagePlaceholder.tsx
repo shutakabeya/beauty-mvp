@@ -32,6 +32,27 @@ export default function ImagePlaceholder({
     setIsLoading(false)
   }
 
+  // 画像が存在しない場合や無効なURLの場合は即座にエラー状態にする
+  if (!src || src === '' || src.startsWith('/images/') && !src.includes('http')) {
+    return (
+      <div 
+        className={`bg-gray-200 flex items-center justify-center ${className}`}
+        style={{ width, height }}
+      >
+        <div className="text-center text-gray-500">
+          <svg 
+            className="w-12 h-12 mx-auto mb-2" 
+            fill="currentColor" 
+            viewBox="0 0 20 20"
+          >
+            <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
+          </svg>
+          <p className="text-sm">画像なし</p>
+        </div>
+      </div>
+    )
+  }
+
   if (imageError) {
     return (
       <div 
@@ -73,6 +94,7 @@ export default function ImagePlaceholder({
         onError={handleError}
         onLoad={handleLoad}
         className={`transition-opacity duration-300 ${isLoading ? 'opacity-0' : 'opacity-100'}`}
+        unoptimized={true}
       />
     </div>
   )

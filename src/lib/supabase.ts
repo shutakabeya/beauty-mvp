@@ -6,11 +6,23 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholde
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 // データベース型定義
+export interface Category {
+  id: number
+  name: string
+  sort_order: number
+  created_at: string
+  updated_at: string
+}
+
 export interface State {
   id: number
   name: string
   description: string
   image_url: string
+  category_id: number | null
+  sort_order: number
+  created_at: string
+  updated_at: string
 }
 
 export interface Product {

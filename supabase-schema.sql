@@ -9,12 +9,23 @@ CREATE TABLE profiles (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- states テーブル
+-- categories テーブル（新規追加）
+CREATE TABLE categories (
+  id SERIAL PRIMARY KEY,
+  name TEXT NOT NULL,
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- states テーブル（効果テーブル）
 CREATE TABLE states (
   id SERIAL PRIMARY KEY,
   name TEXT NOT NULL,
   description TEXT,
   image_url TEXT,
+  category_id INTEGER REFERENCES categories(id) ON DELETE SET NULL,
+  sort_order INTEGER NOT NULL DEFAULT 0,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -47,14 +58,27 @@ CREATE TABLE click_logs (
 CREATE INDEX idx_products_state_id ON products(state_id);
 CREATE INDEX idx_click_logs_timestamp ON click_logs(timestamp);
 CREATE INDEX idx_click_logs_state_id ON click_logs(state_id);
+CREATE INDEX idx_categories_sort_order ON categories(sort_order);
+CREATE INDEX idx_states_category_id ON states(category_id);
+CREATE INDEX idx_states_sort_order ON states(sort_order);
 
 -- サンプルデータ挿入
-INSERT INTO states (id, name, description, image_url) VALUES
-(1, '清潔感を出したい', '清潔感のある印象を与えたい人向け', '/images/clean.jpg'),
-(2, '赤みをなくしたい', '肌の赤みを自然に抑えたい人向け', '/images/redness.jpg'),
-(3, '青ヒゲを目立たなくしたい', '青ヒゲを目立たなくしたい人向け', '/images/beard.jpg'),
-(4, '肌を明るくしたい', '肌を明るく見せたい人向け', '/images/bright.jpg'),
-(5, '毛穴を目立たなくしたい', '毛穴を目立たなくしたい人向け', '/images/pores.jpg');
+-- カテゴリデータ
+INSERT INTO categories (id, name, sort_order) VALUES
+(1, '肌', 1),
+(2, '印象', 2),
+(3, '朝の準備', 3),
+(4, '清潔感', 4),
+(5, '口元', 5),
+(6, '手元', 6);
+
+-- 効果データ（states）
+INSERT INTO states (id, name, description, image_url, category_id, sort_order) VALUES
+(1, '清潔感を出したい', '清潔感のある印象を与えたい人向け', '/images/clean.jpg', 4, 1),
+(2, '赤みをなくしたい', '肌の赤みを自然に抑えたい人向け', '/images/redness.jpg', 1, 2),
+(3, '青ヒゲを目立たなくしたい', '青ヒゲを目立たなくしたい人向け', '/images/beard.jpg', 1, 3),
+(4, '肌を明るくしたい', '肌を明るく見せたい人向け', '/images/bright.jpg', 1, 4),
+(5, '毛穴を目立たなくしたい', '毛穴を目立たなくしたい人向け', '/images/pores.jpg', 1, 5);
 
 -- サンプル商品データ
 INSERT INTO products (name, brand, affiliate_url, image_url, state_id, description) VALUES

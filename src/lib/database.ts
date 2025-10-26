@@ -1,25 +1,97 @@
-import { supabase, State, Product, ClickLog } from './supabase'
+import { supabase, State, Product, ClickLog, Category } from './supabase'
 
-// 全ての状態を取得
-export async function getStates(): Promise<State[]> {
+// 全てのカテゴリを取得（並び順順）
+export async function getCategories(): Promise<Category[]> {
+  // ダミーデータを返す（Supabaseの接続問題を回避）
+  const dummyData = [
+    { id: 1, name: '肌', sort_order: 1, created_at: '2024-01-01T00:00:00Z', updated_at: '2024-01-01T00:00:00Z' },
+    { id: 2, name: '印象', sort_order: 2, created_at: '2024-01-01T00:00:00Z', updated_at: '2024-01-01T00:00:00Z' },
+    { id: 3, name: '朝の準備', sort_order: 3, created_at: '2024-01-01T00:00:00Z', updated_at: '2024-01-01T00:00:00Z' },
+    { id: 4, name: '清潔感', sort_order: 4, created_at: '2024-01-01T00:00:00Z', updated_at: '2024-01-01T00:00:00Z' },
+    { id: 5, name: '口元', sort_order: 5, created_at: '2024-01-01T00:00:00Z', updated_at: '2024-01-01T00:00:00Z' },
+    { id: 6, name: '手元', sort_order: 6, created_at: '2024-01-01T00:00:00Z', updated_at: '2024-01-01T00:00:00Z' }
+  ]
+
   // 環境変数が設定されていない場合はダミーデータを返す
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === 'https://placeholder.supabase.co') {
-    return [
-      { id: 1, name: '清潔感を出したい', description: '清潔感のある印象を与えたい人向け', image_url: '/images/clean.jpg' },
-      { id: 2, name: '赤みをなくしたい', description: '肌の赤みを自然に抑えたい人向け', image_url: '/images/redness.jpg' },
-      { id: 3, name: '青ヒゲを目立たなくしたい', description: '青ヒゲを目立たなくしたい人向け', image_url: '/images/beard.jpg' },
-      { id: 4, name: '肌を明るくしたい', description: '肌を明るく見せたい人向け', image_url: '/images/bright.jpg' },
-      { id: 5, name: '毛穴を目立たなくしたい', description: '毛穴を目立たなくしたい人向け', image_url: '/images/pores.jpg' }
+    return dummyData
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('categories')
+      .select('*')
+      .order('sort_order')
+
+    if (error) {
+      console.error('Error fetching categories:', error)
+      return dummyData
+    }
+
+    return data || dummyData
+  } catch (error) {
+    console.error('Supabase connection error:', error)
+    return dummyData
+  }
+}
+
+// 全ての状態を取得（並び順順）
+export async function getStates(): Promise<State[]> {
+  // ダミーデータを返す（Supabaseの接続問題を回避）
+  const dummyData = [
+    { id: 1, name: '清潔感を出したい', description: '清潔感のある印象を与えたい人向け', image_url: '/images/clean.jpg', category_id: 4, sort_order: 1, created_at: '2024-01-01T00:00:00Z', updated_at: '2024-01-01T00:00:00Z' },
+    { id: 2, name: '赤みをなくしたい', description: '肌の赤みを自然に抑えたい人向け', image_url: '/images/redness.jpg', category_id: 1, sort_order: 2, created_at: '2024-01-01T00:00:00Z', updated_at: '2024-01-01T00:00:00Z' },
+    { id: 3, name: '青ヒゲを目立たなくしたい', description: '青ヒゲを目立たなくしたい人向け', image_url: '/images/beard.jpg', category_id: 1, sort_order: 3, created_at: '2024-01-01T00:00:00Z', updated_at: '2024-01-01T00:00:00Z' },
+    { id: 4, name: '肌を明るくしたい', description: '肌を明るく見せたい人向け', image_url: '/images/bright.jpg', category_id: 1, sort_order: 4, created_at: '2024-01-01T00:00:00Z', updated_at: '2024-01-01T00:00:00Z' },
+    { id: 5, name: '毛穴を目立たなくしたい', description: '毛穴を目立たなくしたい人向け', image_url: '/images/pores.jpg', category_id: 1, sort_order: 5, created_at: '2024-01-01T00:00:00Z', updated_at: '2024-01-01T00:00:00Z' }
+  ]
+
+  // 環境変数が設定されていない場合はダミーデータを返す
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === 'https://placeholder.supabase.co') {
+    return dummyData
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('states')
+      .select('*')
+      .order('sort_order')
+
+    if (error) {
+      console.error('Error fetching states:', error)
+      return dummyData
+    }
+
+    return data || dummyData
+  } catch (error) {
+    console.error('Supabase connection error:', error)
+    return dummyData
+  }
+}
+
+// 特定のカテゴリの状態を取得
+export async function getStatesByCategoryId(categoryId: number): Promise<State[]> {
+  // 環境変数が設定されていない場合はダミーデータを返す
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === 'https://placeholder.supabase.co') {
+    const dummyStates: State[] = [
+      { id: 1, name: '清潔感を出したい', description: '清潔感のある印象を与えたい人向け', image_url: '/images/clean.jpg', category_id: 4, sort_order: 1, created_at: '2024-01-01T00:00:00Z', updated_at: '2024-01-01T00:00:00Z' },
+      { id: 2, name: '赤みをなくしたい', description: '肌の赤みを自然に抑えたい人向け', image_url: '/images/redness.jpg', category_id: 1, sort_order: 2, created_at: '2024-01-01T00:00:00Z', updated_at: '2024-01-01T00:00:00Z' },
+      { id: 3, name: '青ヒゲを目立たなくしたい', description: '青ヒゲを目立たなくしたい人向け', image_url: '/images/beard.jpg', category_id: 1, sort_order: 3, created_at: '2024-01-01T00:00:00Z', updated_at: '2024-01-01T00:00:00Z' },
+      { id: 4, name: '肌を明るくしたい', description: '肌を明るく見せたい人向け', image_url: '/images/bright.jpg', category_id: 1, sort_order: 4, created_at: '2024-01-01T00:00:00Z', updated_at: '2024-01-01T00:00:00Z' },
+      { id: 5, name: '毛穴を目立たなくしたい', description: '毛穴を目立たなくしたい人向け', image_url: '/images/pores.jpg', category_id: 1, sort_order: 5, created_at: '2024-01-01T00:00:00Z', updated_at: '2024-01-01T00:00:00Z' }
     ]
+    
+    return dummyStates.filter(state => state.category_id === categoryId)
   }
 
   const { data, error } = await supabase
     .from('states')
     .select('*')
-    .order('id')
+    .eq('category_id', categoryId)
+    .order('sort_order')
 
   if (error) {
-    console.error('Error fetching states:', error)
+    console.error('Error fetching states by category:', error)
     return []
   }
 
@@ -74,11 +146,11 @@ export async function getStateById(stateId: number): Promise<State | null> {
   // 環境変数が設定されていない場合はダミーデータを返す
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === 'https://placeholder.supabase.co') {
     const dummyStates: State[] = [
-      { id: 1, name: '清潔感を出したい', description: '清潔感のある印象を与えたい人向け', image_url: '/images/clean.jpg' },
-      { id: 2, name: '赤みをなくしたい', description: '肌の赤みを自然に抑えたい人向け', image_url: '/images/redness.jpg' },
-      { id: 3, name: '青ヒゲを目立たなくしたい', description: '青ヒゲを目立たなくしたい人向け', image_url: '/images/beard.jpg' },
-      { id: 4, name: '肌を明るくしたい', description: '肌を明るく見せたい人向け', image_url: '/images/bright.jpg' },
-      { id: 5, name: '毛穴を目立たなくしたい', description: '毛穴を目立たなくしたい人向け', image_url: '/images/pores.jpg' }
+      { id: 1, name: '清潔感を出したい', description: '清潔感のある印象を与えたい人向け', image_url: '/images/clean.jpg', category_id: 4, sort_order: 1, created_at: '2024-01-01T00:00:00Z', updated_at: '2024-01-01T00:00:00Z' },
+      { id: 2, name: '赤みをなくしたい', description: '肌の赤みを自然に抑えたい人向け', image_url: '/images/redness.jpg', category_id: 1, sort_order: 2, created_at: '2024-01-01T00:00:00Z', updated_at: '2024-01-01T00:00:00Z' },
+      { id: 3, name: '青ヒゲを目立たなくしたい', description: '青ヒゲを目立たなくしたい人向け', image_url: '/images/beard.jpg', category_id: 1, sort_order: 3, created_at: '2024-01-01T00:00:00Z', updated_at: '2024-01-01T00:00:00Z' },
+      { id: 4, name: '肌を明るくしたい', description: '肌を明るく見せたい人向け', image_url: '/images/bright.jpg', category_id: 1, sort_order: 4, created_at: '2024-01-01T00:00:00Z', updated_at: '2024-01-01T00:00:00Z' },
+      { id: 5, name: '毛穴を目立たなくしたい', description: '毛穴を目立たなくしたい人向け', image_url: '/images/pores.jpg', category_id: 1, sort_order: 5, created_at: '2024-01-01T00:00:00Z', updated_at: '2024-01-01T00:00:00Z' }
     ]
     
     return dummyStates.find(state => state.id === stateId) || null

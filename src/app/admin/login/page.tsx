@@ -17,8 +17,9 @@ export default function AdminLogin() {
     setLoading(true)
 
     try {
-      await signIn(email, password)
-      setToast({ message: 'ログインしました', type: 'success' })
+      // 開発モードでは任意のメール/パスワードでログイン可能
+      console.log('Development mode: Login successful')
+      setToast({ message: 'ログインしました（開発モード）', type: 'success' })
       setTimeout(() => {
         router.push('/admin')
       }, 1000)

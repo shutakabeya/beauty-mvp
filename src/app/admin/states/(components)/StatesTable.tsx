@@ -20,6 +20,8 @@ export default function StatesTable({ states }: StatesTableProps) {
     { key: 'name', label: '名前', sortable: true },
     { key: 'description', label: '説明', sortable: false },
     { key: 'image_url', label: '画像URL', sortable: false },
+    { key: 'category_id', label: 'カテゴリ', sortable: true },
+    { key: 'sort_order', label: '並び順', sortable: true },
   ]
 
   const handleEdit = (state: State) => {

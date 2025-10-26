@@ -2,44 +2,93 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { getStates } from '@/lib/database'
-import { State } from '@/lib/supabase'
-import { trackViewHome, trackSelectState } from '@/lib/analytics'
+import { getStates, getCategories, getStatesByCategoryId } from '@/lib/database'
+import { State, Category } from '@/lib/supabase'
+import { trackViewHome, trackSwitchMode, trackSelectCategoryTab, trackViewEffectList, trackSelectEffect } from '@/lib/analytics'
 import ImagePlaceholder from '@/components/ImagePlaceholder'
 
 export default function HomePage() {
   const [states, setStates] = useState<State[]>([])
+  const [categories, setCategories] = useState<Category[]>([])
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null)
+  const [categoryStates, setCategoryStates] = useState<State[]>([])
+  const [activeTab, setActiveTab] = useState<'effects' | 'categories'>('effects')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [mounted, setMounted] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    if (!mounted) return
+
     // ページビューをトラッキング
     trackViewHome()
 
-    // 状態データを取得
-    const fetchStates = async () => {
+    // データを取得
+    const fetchData = async () => {
       try {
         setError(null)
-        const statesData = await getStates()
+        const [statesData, categoriesData] = await Promise.all([
+          getStates(),
+          getCategories()
+        ])
         setStates(statesData)
+        setCategories(categoriesData)
       } catch (error) {
-        console.error('Error fetching states:', error)
+        console.error('Error fetching data:', error)
         setError('データの取得に失敗しました。しばらく時間をおいてから再度お試しください。')
       } finally {
         setLoading(false)
       }
     }
 
-    fetchStates()
-  }, [])
+    fetchData()
+  }, [mounted])
 
-  const handleStateSelect = (stateId: number, stateName: string) => {
+  // カテゴリ選択時の処理
+  const handleCategorySelect = async (category: Category) => {
+    try {
+      setSelectedCategory(category)
+      trackSelectCategoryTab(category.name, category.sort_order)
+      
+      const statesData = await getStatesByCategoryId(category.id)
+      setCategoryStates(statesData)
+      trackViewEffectList('category', category.name)
+    } catch (error) {
+      console.error('Error fetching category states:', error)
+    }
+  }
+
+  // タブ切り替え
+  const handleTabChange = (tab: 'effects' | 'categories') => {
+    setActiveTab(tab)
+    trackSwitchMode(tab)
+    if (tab === 'effects') {
+      trackViewEffectList('effects')
+    }
+  }
+
+  const handleStateSelect = (stateId: number, stateName: string, mode: 'effects' | 'category' = 'effects', categoryName?: string, rank?: number) => {
     // GA4イベント送信
-    trackSelectState(stateName)
+    trackSelectEffect(stateId, stateName, mode, categoryName, rank)
     
     // 提案ページに遷移
     router.push(`/suggestion/${stateId}`)
+  }
+
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">読み込み中...</p>
+        </div>
+      </div>
+    )
   }
 
   if (loading) {
@@ -82,7 +131,7 @@ export default function HomePage() {
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8">
         {/* ヘッダー */}
-        <div className="text-center mb-12">
+        <div className="text-center mb-8">
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
             どうなりたいですか？
           </h1>
@@ -91,50 +140,160 @@ export default function HomePage() {
           </p>
         </div>
 
-        {/* 状態選択ボタン */}
-        <div className="max-w-2xl mx-auto">
-          <div className="grid gap-4">
-            {states.map((state) => (
-              <button
-                key={state.id}
-                onClick={() => handleStateSelect(state.id, state.name)}
-                className="group bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-200 p-6 text-left border border-gray-200 hover:border-blue-300 hover:scale-105 cursor-pointer"
-              >
-                <div className="flex items-center space-x-4">
-                  <div className="shrink-0">
-                    <ImagePlaceholder
-                      src={state.image_url || '/images/placeholder.svg'}
-                      alt={state.name}
-                      width={48}
-                      height={48}
-                      className="w-12 h-12 rounded-full object-cover"
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
-                      {state.name}
-                    </h3>
-                    {state.description && (
-                      <p className="text-sm text-gray-600 mt-1">
-                        {state.description}
-                      </p>
-                    )}
-                  </div>
-                  <div className="shrink-0">
-                    <svg 
-                      className="w-5 h-5 text-gray-400 group-hover:text-blue-600 transition-colors" 
-                      fill="none" 
-                      stroke="currentColor" 
-                      viewBox="0 0 24 24"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </div>
-                </div>
-              </button>
-            ))}
+        {/* タブ切り替え */}
+        <div className="max-w-2xl mx-auto mb-8">
+          <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg" role="tablist">
+            <button
+              onClick={() => handleTabChange('effects')}
+              className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors ${
+                activeTab === 'effects'
+                  ? 'bg-white text-blue-600 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+              role="tab"
+              aria-selected={activeTab === 'effects'}
+            >
+              効果でえらぶ
+            </button>
+            <button
+              onClick={() => handleTabChange('categories')}
+              className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors ${
+                activeTab === 'categories'
+                  ? 'bg-white text-blue-600 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+              role="tab"
+              aria-selected={activeTab === 'categories'}
+            >
+              カテゴリからえらぶ
+            </button>
           </div>
         </div>
+
+        {/* タブ内容 */}
+        {activeTab === 'effects' && (
+          <div className="max-w-4xl mx-auto">
+            {/* 効果タブ - グリッドレイアウト */}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {states.map((state, index) => (
+                <button
+                  key={state.id}
+                  onClick={() => handleStateSelect(state.id, state.name, 'effects', undefined, index + 1)}
+                  className="group bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200 p-3 text-left border border-gray-200 hover:scale-105 min-h-[88px]"
+                >
+                  <div className="flex items-center space-x-3">
+                    <div className="shrink-0">
+                      <ImagePlaceholder
+                        src={state.image_url || '/images/placeholder.svg'}
+                        alt={state.name}
+                        width={32}
+                        height={32}
+                        className="w-8 h-8 rounded-full object-cover"
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-sm font-semibold text-gray-900 transition-colors line-clamp-2 leading-tight">
+                        {state.name}
+                      </h3>
+                    </div>
+                    <div className="shrink-0">
+                      <svg 
+                        className="w-4 h-4 text-gray-400 transition-colors" 
+                        fill="none" 
+                        stroke="currentColor" 
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'categories' && (
+          <div className="max-w-4xl mx-auto">
+            {/* カテゴリタブ - Apple Music風 */}
+            {!selectedCategory ? (
+              <div>
+                {/* カテゴリ選択 */}
+                <div className="grid grid-cols-2 gap-2 mb-8">
+                  {categories.map((category) => (
+                    <button
+                      key={category.id}
+                      onClick={() => handleCategorySelect(category)}
+                      className="bg-white hover:bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm text-left transition-colors min-h-[56px] cursor-pointer shadow-sm hover:shadow-md hover:scale-105"
+                    >
+                      <div className="text-sm font-medium text-gray-900 leading-tight line-clamp-2">
+                        {category.name}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div>
+                {/* 選択されたカテゴリの効果一覧 */}
+                <div className="mb-6">
+                  <button
+                    onClick={() => setSelectedCategory(null)}
+                    className="text-blue-600 hover:text-blue-800 text-sm font-medium mb-4"
+                  >
+                    ← {selectedCategory.name} に戻る
+                  </button>
+                  <h2 className="text-xl font-semibold text-gray-900 mb-4">
+                    {selectedCategory.name}
+                  </h2>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-2">
+                  {categoryStates.map((state, index) => (
+                    <button
+                      key={state.id}
+                      onClick={() => handleStateSelect(state.id, state.name, 'category', selectedCategory.name, index + 1)}
+                      className="group bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 p-3 text-left border border-gray-200 hover:border-blue-300 hover:scale-105 min-h-[88px] cursor-pointer"
+                    >
+                      <div className="flex items-center space-x-3">
+                        <div className="shrink-0">
+                          <ImagePlaceholder
+                            src={state.image_url || '/images/placeholder.svg'}
+                            alt={state.name}
+                            width={32}
+                            height={32}
+                            className="w-8 h-8 rounded-full object-cover"
+                          />
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="text-sm font-semibold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2 leading-tight">
+                            {state.name}
+                          </h3>
+                        </div>
+                        <div className="shrink-0">
+                          <svg 
+                            className="w-4 h-4 text-gray-400 group-hover:text-blue-600 transition-colors" 
+                            fill="none" 
+                            stroke="currentColor" 
+                            viewBox="0 0 24 24"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+                
+                {categoryStates.length === 0 && (
+                  <div className="text-center py-8">
+                    <p className="text-gray-500">このカテゴリには効果がありません</p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* フッター */}
         <div className="text-center mt-16 text-sm text-gray-500">
@@ -144,3 +303,4 @@ export default function HomePage() {
     </div>
   )
 }
+
