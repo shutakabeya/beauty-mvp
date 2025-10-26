@@ -69,7 +69,7 @@ export default function StatesTable({ states }: StatesTableProps) {
 
       {(editingState || isCreating) && (
         <StateForm
-          state={editingState}
+          state={editingState || undefined}
           onClose={handleFormClose}
         />
       )}

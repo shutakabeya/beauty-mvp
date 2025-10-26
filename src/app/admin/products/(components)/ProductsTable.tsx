@@ -70,7 +70,7 @@ export default function ProductsTable({ products, states }: ProductsTableProps) 
 
       {(editingProduct || isCreating) && (
         <ProductForm
-          product={editingProduct}
+          product={editingProduct || undefined}
           states={states}
           onClose={handleFormClose}
         />
