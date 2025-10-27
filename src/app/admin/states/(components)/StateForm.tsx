@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { State, Category } from '@/lib/supabase'
 import { createState, updateState } from '@/lib/admin-actions'
 import { getCategories } from '@/lib/database'
@@ -13,6 +14,7 @@ interface StateFormProps {
 }
 
 export default function StateForm({ state, onClose }: StateFormProps) {
+  const router = useRouter()
   const [formData, setFormData] = useState({
     name: state?.name || '',
     description: state?.description || '',
@@ -78,35 +80,21 @@ export default function StateForm({ state, onClose }: StateFormProps) {
       }
       form.append('sort_order', formData.sort_order.toString())
 
-      console.log('Submitting form:', {
-        name: formData.name,
-        description: formData.description,
-        image_url: formData.image_url,
-        category_id: formData.category_id,
-        sort_order: formData.sort_order
-      })
-
       const result = state 
         ? await updateState(state.id, form)
         : await createState(form)
-
-      console.log('Submit result:', result)
 
       if (result.success) {
         setToast({ 
           message: state ? '状態を更新しました' : '状態を作成しました', 
           type: 'success' 
         })
-        setTimeout(() => {
-          onClose()
-          window.location.reload()
-        }, 1000)
+        onClose()
+        router.refresh()
       } else {
-        console.error('Submit failed:', result.error)
         setToast({ message: result.error || 'エラーが発生しました', type: 'error' })
       }
     } catch (error) {
-      console.error('Submit error:', error)
       setToast({ message: 'エラーが発生しました', type: 'error' })
     } finally {
       setLoading(false)

@@ -13,9 +13,7 @@ const CategorySchema = z.object({
 const StateSchema = z.object({
   name: z.string().min(1, '名前は必須です').max(50, '名前は50文字以内で入力してください'),
   description: z.string().optional(),
-  image_url: z.string().refine((val) => !val || z.string().url().safeParse(val).success, {
-    message: '有効なURLを入力してください'
-  }).optional(),
+  image_url: z.string().url('有効なURLを入力してください').optional().or(z.literal('')),
   category_id: z.number().optional(),
   sort_order: z.number().min(0, '並び順は0以上で入力してください')
 })
@@ -27,9 +25,7 @@ const ProductSchema = z.object({
     (url) => url.includes('amazon.co.jp'),
     'Amazon.co.jpのURLを入力してください'
   ),
-  image_url: z.string().refine((val) => !val || z.string().url().safeParse(val).success, {
-    message: '有効なURLを入力してください'
-  }).optional(),
+  image_url: z.string().url('有効なURLを入力してください').optional().or(z.literal('')),
   state_id: z.number().min(1, '状態を選択してください'),
   description: z.string().optional(),
   status: z.enum(['active', 'hidden']).default('active')
@@ -121,7 +117,7 @@ export async function createState(formData: FormData) {
     const data = {
       name: formData.get('name') as string,
       description: formData.get('description') as string,
-      image_url: (formData.get('image_url') as string) || undefined,
+      image_url: formData.get('image_url') as string,
       category_id: formData.get('category_id') ? parseInt(formData.get('category_id') as string) : undefined,
       sort_order: parseInt(formData.get('sort_order') as string) || 0,
     }
@@ -152,7 +148,7 @@ export async function updateState(id: number, formData: FormData) {
     const data = {
       name: formData.get('name') as string,
       description: formData.get('description') as string,
-      image_url: (formData.get('image_url') as string) || undefined,
+      image_url: formData.get('image_url') as string,
       category_id: formData.get('category_id') ? parseInt(formData.get('category_id') as string) : undefined,
       sort_order: parseInt(formData.get('sort_order') as string) || 0,
     }
