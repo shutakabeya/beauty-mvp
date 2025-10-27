@@ -3,6 +3,10 @@ import { getStates } from '@/lib/database'
 import { getProductsByStateId } from '@/lib/database'
 import { BarChart3, TrendingUp, Users, Package } from 'lucide-react'
 
+// 管理画面は常に動的レンダリング
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export default async function AdminDashboard() {
   // 分析データを取得（過去7日）
   const analyticsResult = await getAnalyticsData(7)

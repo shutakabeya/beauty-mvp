@@ -3,6 +3,10 @@ import { createState, updateState, deleteState } from '@/lib/admin-actions'
 import StatesTable from './(components)/StatesTable'
 import StateForm from './(components)/StateForm'
 
+// 管理画面は常に動的レンダリング
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export default async function StatesPage() {
   const states = await getStates()
 

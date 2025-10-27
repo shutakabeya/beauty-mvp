@@ -2,6 +2,10 @@ import { getCategories } from '@/lib/database'
 import { Category } from '@/lib/supabase'
 import CategoriesTable from './(components)/CategoriesTable'
 
+// 管理画面は常に動的レンダリング
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export default async function CategoriesPage() {
   const categories = await getCategories()
 

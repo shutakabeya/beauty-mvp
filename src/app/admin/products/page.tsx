@@ -3,6 +3,10 @@ import { getProductsByStateId } from '@/lib/database'
 import ProductsTable from './(components)/ProductsTable'
 import ProductForm from './(components)/ProductForm'
 
+// 管理画面は常に動的レンダリング
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export default async function ProductsPage() {
   const states = await getStates()
   
