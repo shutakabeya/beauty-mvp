@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Product, State } from '@/lib/supabase'
 import DataTable from '@/components/admin/DataTable'
@@ -13,11 +13,17 @@ interface ProductsTableProps {
   states: State[]
 }
 
-export default function ProductsTable({ products, states }: ProductsTableProps) {
+export default function ProductsTable({ products: initialProducts, states }: ProductsTableProps) {
   const router = useRouter()
+  const [products, setProducts] = useState(initialProducts)
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
   const [isCreating, setIsCreating] = useState(false)
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
+
+  // 親から受け取ったproductsが変更されたら更新
+  useEffect(() => {
+    setProducts(initialProducts)
+  }, [initialProducts])
 
   const columns = [
     { key: 'id', label: 'ID', sortable: true },
@@ -38,6 +44,7 @@ export default function ProductsTable({ products, states }: ProductsTableProps) 
     try {
       const result = await deleteProduct(product.id)
       if (result.success) {
+        setProducts(products.filter(p => p.id !== product.id))
         setToast({ message: '商品を削除しました', type: 'success' })
         router.refresh()
       } else {
@@ -58,6 +65,13 @@ export default function ProductsTable({ products, states }: ProductsTableProps) 
     setIsCreating(false)
   }
 
+  const handleFormSuccess = async () => {
+    // サーバーから最新データを再取得
+    await router.refresh()
+    // ページを再読み込みして確実に最新データを反映
+    window.location.reload()
+  }
+
   return (
     <>
       <DataTable
@@ -75,6 +89,7 @@ export default function ProductsTable({ products, states }: ProductsTableProps) 
           product={editingProduct || undefined}
           states={states}
           onClose={handleFormClose}
+          onSuccess={handleFormSuccess}
         />
       )}
 

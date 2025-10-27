@@ -11,9 +11,10 @@ interface ProductFormProps {
   product?: Product
   states: State[]
   onClose: () => void
+  onSuccess?: () => void
 }
 
-export default function ProductForm({ product, states, onClose }: ProductFormProps) {
+export default function ProductForm({ product, states, onClose, onSuccess }: ProductFormProps) {
   const router = useRouter()
   const [formData, setFormData] = useState({
     name: product?.name || '',
@@ -95,6 +96,11 @@ export default function ProductForm({ product, states, onClose }: ProductFormPro
         })
         onClose()
         router.refresh()
+        onSuccess?.()
+        // 確実に最新データを反映するためにページを再読み込み
+        setTimeout(() => {
+          window.location.reload()
+        }, 500)
       } else {
         setToast({ message: result.error || 'エラーが発生しました', type: 'error' })
       }
