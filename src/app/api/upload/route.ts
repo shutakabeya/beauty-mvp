@@ -3,6 +3,14 @@ import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(request: NextRequest) {
   try {
+    // 環境変数のチェック
+    if (!process.env.BLOB_READ_WRITE_TOKEN) {
+      console.error('BLOB_READ_WRITE_TOKEN が設定されていません')
+      return NextResponse.json({ 
+        error: 'ファイルアップロード機能が設定されていません。環境変数を確認してください。' 
+      }, { status: 500 })
+    }
+
     const formData = await request.formData()
     const file = formData.get('file') as File
 
@@ -21,8 +29,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'JPEG、PNG、WebP、GIFファイルのみアップロード可能です' }, { status: 400 })
     }
 
+    // ユニークなファイル名を生成
+    const timestamp = Date.now()
+    const randomSuffix = Math.random().toString(36).substring(7)
+    const uniqueFileName = `${timestamp}-${randomSuffix}-${file.name}`
+
     // Vercel Blobにアップロード
-    const blob = await put(file.name, file, {
+    const blob = await put(uniqueFileName, file, {
       access: 'public',
     })
 
@@ -34,6 +47,9 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('Upload error:', error)
-    return NextResponse.json({ error: 'アップロードに失敗しました' }, { status: 500 })
+    return NextResponse.json({ 
+      error: 'アップロードに失敗しました',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 })
   }
 }

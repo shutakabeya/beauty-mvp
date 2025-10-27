@@ -78,9 +78,19 @@ export default function StateForm({ state, onClose }: StateFormProps) {
       }
       form.append('sort_order', formData.sort_order.toString())
 
+      console.log('Submitting form:', {
+        name: formData.name,
+        description: formData.description,
+        image_url: formData.image_url,
+        category_id: formData.category_id,
+        sort_order: formData.sort_order
+      })
+
       const result = state 
         ? await updateState(state.id, form)
         : await createState(form)
+
+      console.log('Submit result:', result)
 
       if (result.success) {
         setToast({ 
@@ -92,9 +102,11 @@ export default function StateForm({ state, onClose }: StateFormProps) {
           window.location.reload()
         }, 1000)
       } else {
+        console.error('Submit failed:', result.error)
         setToast({ message: result.error || 'エラーが発生しました', type: 'error' })
       }
     } catch (error) {
+      console.error('Submit error:', error)
       setToast({ message: 'エラーが発生しました', type: 'error' })
     } finally {
       setLoading(false)
