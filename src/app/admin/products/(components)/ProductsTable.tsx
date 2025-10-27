@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Product, State } from '@/lib/supabase'
 import DataTable from '@/components/admin/DataTable'
 import ProductForm from './ProductForm'
@@ -13,6 +14,7 @@ interface ProductsTableProps {
 }
 
 export default function ProductsTable({ products, states }: ProductsTableProps) {
+  const router = useRouter()
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
   const [isCreating, setIsCreating] = useState(false)
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
@@ -37,7 +39,7 @@ export default function ProductsTable({ products, states }: ProductsTableProps) 
       const result = await deleteProduct(product.id)
       if (result.success) {
         setToast({ message: '商品を削除しました', type: 'success' })
-        window.location.reload()
+        router.refresh()
       } else {
         setToast({ message: result.error || '削除に失敗しました', type: 'error' })
       }
