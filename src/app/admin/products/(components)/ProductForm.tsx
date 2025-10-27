@@ -23,7 +23,50 @@ export default function ProductForm({ product, states, onClose }: ProductFormPro
     status: product?.status || 'active',
   })
   const [loading, setLoading] = useState(false)
+  const [uploading, setUploading] = useState(false)
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
+
+  // 画像アップロード処理
+  const handleImageUpload = async (file: File) => {
+    try {
+      setUploading(true)
+      const uploadFormData = new FormData()
+      uploadFormData.append('file', file)
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: uploadFormData,
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        console.error('Upload failed:', {
+          status: response.status,
+          statusText: response.statusText,
+          error: result.error,
+          details: result.details
+        })
+        setToast({ 
+          message: result.error || 'アップロードに失敗しました', 
+          type: 'error' 
+        })
+        return
+      }
+
+      if (result.success) {
+        setFormData(prev => ({ ...prev, image_url: result.url }))
+        setToast({ message: '画像をアップロードしました', type: 'success' })
+      } else {
+        setToast({ message: result.error || 'アップロードに失敗しました', type: 'error' })
+      }
+    } catch (error) {
+      console.error('Upload error:', error)
+      setToast({ message: 'アップロードに失敗しました', type: 'error' })
+    } finally {
+      setUploading(false)
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -39,9 +82,21 @@ export default function ProductForm({ product, states, onClose }: ProductFormPro
       form.append('description', formData.description)
       form.append('status', formData.status)
 
+      console.log('Submitting product form:', {
+        name: formData.name,
+        brand: formData.brand,
+        affiliate_url: formData.affiliate_url,
+        image_url: formData.image_url,
+        state_id: formData.state_id,
+        description: formData.description,
+        status: formData.status
+      })
+
       const result = product 
         ? await updateProduct(product.id, form)
         : await createProduct(form)
+
+      console.log('Submit result:', result)
 
       if (result.success) {
         setToast({ 
@@ -53,9 +108,11 @@ export default function ProductForm({ product, states, onClose }: ProductFormPro
           window.location.reload()
         }, 1000)
       } else {
+        console.error('Submit failed:', result.error)
         setToast({ message: result.error || 'エラーが発生しました', type: 'error' })
       }
     } catch (error) {
+      console.error('Submit error:', error)
       setToast({ message: 'エラーが発生しました', type: 'error' })
     } finally {
       setLoading(false)
@@ -143,16 +200,51 @@ export default function ProductForm({ product, states, onClose }: ProductFormPro
 
           <div>
             <label htmlFor="image_url" className="block text-sm font-medium text-gray-700">
-              画像URL
+              画像
             </label>
-            <input
-              type="url"
-              id="image_url"
-              value={formData.image_url}
-              onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-              className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              placeholder="https://example.com/image.jpg"
-            />
+            
+            {/* 画像アップロード */}
+            <div className="mt-1">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0]
+                  if (file) handleImageUpload(file)
+                }}
+                disabled={uploading}
+                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 disabled:opacity-50"
+              />
+              {uploading && (
+                <p className="mt-2 text-sm text-blue-600">アップロード中...</p>
+              )}
+            </div>
+
+            {/* 現在の画像URL（手動入力も可能） */}
+            <div className="mt-2">
+              <input
+                type="url"
+                id="image_url"
+                value={formData.image_url}
+                onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
+                className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                placeholder="画像URL（手動入力も可能）"
+              />
+            </div>
+
+            {/* 画像プレビュー */}
+            {formData.image_url && (
+              <div className="mt-2">
+                <img
+                  src={formData.image_url}
+                  alt="プレビュー"
+                  className="w-20 h-20 object-cover rounded-md border"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none'
+                  }}
+                />
+              </div>
+            )}
           </div>
 
           <div>
