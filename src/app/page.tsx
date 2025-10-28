@@ -296,8 +296,8 @@ export default function HomePage() {
         )}
 
         {/* フッター */}
-        <div className="text-center mt-16 text-sm text-gray-500">
-          <p>※ このサービスはAmazonアソシエイトプログラムを利用しています</p>
+        <div className="text-center mt-16 text-xs text-gray-400">
+          <p>&copy; {new Date().getFullYear()} どうなりたい？. All rights reserved.</p>
         </div>
       </div>
     </div>

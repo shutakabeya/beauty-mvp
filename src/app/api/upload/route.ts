@@ -37,3 +37,4 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'アップロードに失敗しました' }, { status: 500 })
   }
 }
+

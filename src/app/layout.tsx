@@ -10,8 +10,8 @@ const notoSansJP = Noto_Sans_JP({
 });
 
 export const metadata: Metadata = {
-  title: "どうなりたいかドリブン - 美容MVP",
-  description: "選ぶだけで、あなたに合った美容解決策を提案します。",
+  title: "どうなりたい？ | 効果で選ぶ美容プラットフォーム",
+  description: "なりたい状態はありますか？対処したい悩みはありますか？「どうなりたい？」は、肌の赤み・青ひげ・毛穴などを目的から探せる、効果ドリブンの美容プラットフォームです。",
   icons: {
     icon: [
       { url: '/favicon.ico', sizes: 'any' },
