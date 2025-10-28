@@ -1,13 +1,13 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { getStates, getCategories, getStatesByCategoryId, getCategoryById } from '@/lib/database'
 import { State, Category } from '@/lib/supabase'
 import { trackViewHome, trackSwitchMode, trackSelectCategoryTab, trackViewEffectList, trackSelectEffect } from '@/lib/analytics'
 import ImagePlaceholder from '@/components/ImagePlaceholder'
 
-export default function HomePage() {
+function HomePageContent() {
   const [states, setStates] = useState<State[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null)
@@ -320,6 +320,21 @@ export default function HomePage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function HomePage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">読み込み中...</p>
+        </div>
+      </div>
+    }>
+      <HomePageContent />
+    </Suspense>
   )
 }
 

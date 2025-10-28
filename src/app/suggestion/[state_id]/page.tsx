@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import { getStateById, getProductsByStateId, logClick, getCategoryById } from '@/lib/database'
@@ -8,7 +8,7 @@ import { State, Product, Category } from '@/lib/supabase'
 import { trackViewSuggestion, trackClickAffiliate } from '@/lib/analytics'
 import ImagePlaceholder from '@/components/ImagePlaceholder'
 
-export default function SuggestionPage() {
+function SuggestionPageContent() {
   const [state, setState] = useState<State | null>(null)
   const [products, setProducts] = useState<Product[]>([])
   const [category, setCategory] = useState<Category | null>(null)
@@ -237,5 +237,20 @@ export default function SuggestionPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function SuggestionPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">読み込み中...</p>
+        </div>
+      </div>
+    }>
+      <SuggestionPageContent />
+    </Suspense>
   )
 }
