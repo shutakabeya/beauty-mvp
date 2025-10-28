@@ -179,7 +179,7 @@ export default function HomePage() {
                 <button
                   key={state.id}
                   onClick={() => handleStateSelect(state.id, state.name, 'effects', undefined, index + 1)}
-                  className="group bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200 p-3 text-left border border-gray-200 hover:scale-105 min-h-[88px]"
+                  className="group bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200 p-3 text-left border border-gray-200 hover:scale-105 min-h-[88px] cursor-pointer"
                 >
                   <div className="flex items-center space-x-3">
                     <div className="shrink-0">
@@ -224,7 +224,7 @@ export default function HomePage() {
                     <button
                       key={category.id}
                       onClick={() => handleCategorySelect(category)}
-                      className="bg-white hover:bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm text-left transition-colors min-h-[56px] cursor-pointer shadow-sm hover:shadow-md hover:scale-105"
+                      className="bg-white hover:bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm text-left transition-all duration-200 min-h-[56px] cursor-pointer shadow-sm hover:shadow-md hover:scale-105"
                     >
                       <div className="text-sm font-medium text-gray-900 leading-tight line-clamp-2">
                         {category.name}

@@ -158,7 +158,7 @@ export default function SuggestionPage() {
             {products.map((product) => (
               <div
                 key={product.id}
-                className="bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-200 overflow-hidden border border-gray-200 hover:border-blue-300"
+                className="bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-200 overflow-hidden border border-gray-200 hover:border-blue-300 cursor-pointer"
               >
                 {/* 商品画像 */}
                 <div className="aspect-square">
