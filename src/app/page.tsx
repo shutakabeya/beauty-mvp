@@ -145,7 +145,7 @@ export default function HomePage() {
           <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg" role="tablist">
             <button
               onClick={() => handleTabChange('effects')}
-              className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors ${
+              className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors cursor-pointer ${
                 activeTab === 'effects'
                   ? 'bg-white text-blue-600 shadow-sm'
                   : 'text-gray-600 hover:text-gray-900'
@@ -157,7 +157,7 @@ export default function HomePage() {
             </button>
             <button
               onClick={() => handleTabChange('categories')}
-              className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors ${
+              className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors cursor-pointer ${
                 activeTab === 'categories'
                   ? 'bg-white text-blue-600 shadow-sm'
                   : 'text-gray-600 hover:text-gray-900'
@@ -239,7 +239,7 @@ export default function HomePage() {
                 <div className="mb-6">
                   <button
                     onClick={() => setSelectedCategory(null)}
-                    className="text-blue-600 hover:text-blue-800 text-sm font-medium mb-4"
+                    className="text-blue-600 hover:text-blue-800 text-sm font-medium mb-4 cursor-pointer"
                   >
                     ← {selectedCategory.name} に戻る
                   </button>
