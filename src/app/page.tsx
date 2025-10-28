@@ -1,8 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { getStates, getCategories, getStatesByCategoryId } from '@/lib/database'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { getStates, getCategories, getStatesByCategoryId, getCategoryById } from '@/lib/database'
 import { State, Category } from '@/lib/supabase'
 import { trackViewHome, trackSwitchMode, trackSelectCategoryTab, trackViewEffectList, trackSelectEffect } from '@/lib/analytics'
 import ImagePlaceholder from '@/components/ImagePlaceholder'
@@ -17,6 +17,7 @@ export default function HomePage() {
   const [error, setError] = useState<string | null>(null)
   const [mounted, setMounted] = useState(false)
   const router = useRouter()
+  const searchParams = useSearchParams()
 
   useEffect(() => {
     setMounted(true)
@@ -38,6 +39,20 @@ export default function HomePage() {
         ])
         setStates(statesData)
         setCategories(categoriesData)
+
+        // クエリパラメータからカテゴリ情報を取得
+        const mode = searchParams.get('mode')
+        const categoryId = searchParams.get('category_id')
+        
+        if (mode === 'categories' && categoryId) {
+          const categoryData = await getCategoryById(parseInt(categoryId))
+          if (categoryData) {
+            setSelectedCategory(categoryData)
+            setActiveTab('categories')
+            const statesDataByCategory = await getStatesByCategoryId(categoryData.id)
+            setCategoryStates(statesDataByCategory)
+          }
+        }
       } catch (error) {
         console.error('Error fetching data:', error)
         setError('データの取得に失敗しました。しばらく時間をおいてから再度お試しください。')
@@ -47,7 +62,7 @@ export default function HomePage() {
     }
 
     fetchData()
-  }, [mounted])
+  }, [mounted, searchParams])
 
   // カテゴリ選択時の処理
   const handleCategorySelect = async (category: Category) => {
@@ -76,8 +91,12 @@ export default function HomePage() {
     // GA4イベント送信
     trackSelectEffect(stateId, stateName, mode, categoryName, rank)
     
-    // 提案ページに遷移
-    router.push(`/suggestion/${stateId}`)
+    // 提案ページに遷移（クエリパラメータで遷移元を保持）
+    if (mode === 'category' && selectedCategory) {
+      router.push(`/suggestion/${stateId}?mode=category&category_id=${selectedCategory.id}`)
+    } else {
+      router.push(`/suggestion/${stateId}?mode=effects`)
+    }
   }
 
   if (!mounted) {

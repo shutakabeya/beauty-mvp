@@ -98,6 +98,40 @@ export async function getStatesByCategoryId(categoryId: number): Promise<State[]
   return data || []
 }
 
+// 特定のカテゴリをIDで取得
+export async function getCategoryById(categoryId: number): Promise<Category | null> {
+  // 環境変数が設定されていない場合はダミーデータを返す
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === 'https://placeholder.supabase.co') {
+    const dummyData: Category[] = [
+      { id: 1, name: '肌', sort_order: 1, created_at: '2024-01-01T00:00:00Z', updated_at: '2024-01-01T00:00:00Z' },
+      { id: 2, name: '印象', sort_order: 2, created_at: '2024-01-01T00:00:00Z', updated_at: '2024-01-01T00:00:00Z' },
+      { id: 3, name: '朝の準備', sort_order: 3, created_at: '2024-01-01T00:00:00Z', updated_at: '2024-01-01T00:00:00Z' },
+      { id: 4, name: '清潔感', sort_order: 4, created_at: '2024-01-01T00:00:00Z', updated_at: '2024-01-01T00:00:00Z' },
+      { id: 5, name: '口元', sort_order: 5, created_at: '2024-01-01T00:00:00Z', updated_at: '2024-01-01T00:00:00Z' },
+      { id: 6, name: '手元', sort_order: 6, created_at: '2024-01-01T00:00:00Z', updated_at: '2024-01-01T00:00:00Z' }
+    ]
+    return dummyData.find(cat => cat.id === categoryId) || null
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('categories')
+      .select('*')
+      .eq('id', categoryId)
+      .single()
+
+    if (error) {
+      console.error('Error fetching category by id:', error)
+      return null
+    }
+
+    return data
+  } catch (error) {
+    console.error('Supabase connection error:', error)
+    return null
+  }
+}
+
 // 特定の状態の商品を取得（アクティブのみ）
 export async function getProductsByStateId(stateId: number): Promise<Product[]> {
   // 環境変数が設定されていない場合はダミーデータを返す

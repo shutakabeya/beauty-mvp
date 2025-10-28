@@ -1,28 +1,39 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
-import { getStateById, getProductsByStateId, logClick } from '@/lib/database'
-import { State, Product } from '@/lib/supabase'
+import { getStateById, getProductsByStateId, logClick, getCategoryById } from '@/lib/database'
+import { State, Product, Category } from '@/lib/supabase'
 import { trackViewSuggestion, trackClickAffiliate } from '@/lib/analytics'
 import ImagePlaceholder from '@/components/ImagePlaceholder'
 
 export default function SuggestionPage() {
   const [state, setState] = useState<State | null>(null)
   const [products, setProducts] = useState<Product[]>([])
+  const [category, setCategory] = useState<Category | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [sessionId] = useState(() => Math.random().toString(36).substring(2, 15))
   
   const params = useParams()
   const router = useRouter()
+  const searchParams = useSearchParams()
   const stateId = parseInt(params.state_id as string)
+  const mode = searchParams.get('mode') || 'effects'
+  const categoryId = searchParams.get('category_id')
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setError(null)
+        
+        // カテゴリモードの場合、カテゴリ情報を取得
+        if (mode === 'category' && categoryId) {
+          const categoryData = await getCategoryById(parseInt(categoryId))
+          setCategory(categoryData)
+        }
+
         const [stateData, productsData] = await Promise.all([
           getStateById(stateId),
           getProductsByStateId(stateId)
@@ -47,7 +58,7 @@ export default function SuggestionPage() {
     }
 
     fetchData()
-  }, [stateId])
+  }, [stateId, mode, categoryId])
 
   const handleProductClick = async (product: Product) => {
     // GA4イベント送信
@@ -64,6 +75,14 @@ export default function SuggestionPage() {
 
   const handleBackToHome = () => {
     router.push('/')
+  }
+
+  const handleBackToCategory = () => {
+    if (categoryId) {
+      router.push(`/?mode=categories&category_id=${categoryId}`)
+    } else {
+      router.push('/')
+    }
   }
 
   if (loading) {
@@ -134,15 +153,27 @@ export default function SuggestionPage() {
       <div className="container mx-auto px-4 py-8">
         {/* ヘッダー */}
         <div className="text-center mb-8">
-          <button
-            onClick={handleBackToHome}
-            className="inline-flex items-center text-blue-600 hover:text-blue-700 mb-6 transition-colors cursor-pointer"
-          >
-            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            ホームに戻る
-          </button>
+          {mode === 'category' && category ? (
+            <button
+              onClick={handleBackToCategory}
+              className="inline-flex items-center text-blue-600 hover:text-blue-700 mb-6 transition-colors cursor-pointer"
+            >
+              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              ← {category.name} に戻る
+            </button>
+          ) : (
+            <button
+              onClick={handleBackToHome}
+              className="inline-flex items-center text-blue-600 hover:text-blue-700 mb-6 transition-colors cursor-pointer"
+            >
+              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              ホームに戻る
+            </button>
+          )}
           
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
             {state.name}あなたへ
