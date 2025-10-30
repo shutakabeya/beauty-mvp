@@ -16,6 +16,7 @@ export default function ProductCard({
   className = '' 
 }: ProductCardProps) {
   const [isHovered, setIsHovered] = useState(false)
+  const [isTouched, setIsTouched] = useState(false)
 
   return (
     <div
@@ -28,6 +29,8 @@ export default function ProductCard({
       `}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      onTouchStart={() => setIsTouched(true)}
+      onTouchEnd={() => setTimeout(() => setIsTouched(false), 150)}
     >
       {/* 商品画像 */}
       <div className="aspect-square relative overflow-hidden">
@@ -40,7 +43,7 @@ export default function ProductCard({
         />
         
         {/* ホバー時のオーバーレイ */}
-        {isHovered && (
+        {(isHovered || isTouched) && (
           <div className="absolute inset-0 bg-black bg-opacity-20 flex items-center justify-center">
             <div className="bg-white bg-opacity-90 rounded-full p-2">
               <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

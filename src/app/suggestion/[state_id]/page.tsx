@@ -68,9 +68,6 @@ function SuggestionPageContent() {
     if (state) {
       await logClick(state.id, product.id, sessionId)
     }
-    
-    // Amazonページを新規タブで開く
-    window.open(product.affiliate_url, '_blank', 'noopener,noreferrer')
   }
 
   const handleBackToHome = () => {
@@ -219,12 +216,15 @@ function SuggestionPageContent() {
                   </p>
 
                   {/* CTAボタン */}
-                  <button
+                  <a
+                    href={product.affiliate_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     onClick={() => handleProductClick(product)}
-                    className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 cursor-pointer"
+                    className="block w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 cursor-pointer text-center"
                   >
                     商品をサイトで見る
-                  </button>
+                  </a>
                 </div>
               </div>
             ))}
