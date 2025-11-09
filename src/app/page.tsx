@@ -155,7 +155,7 @@ function HomePageContent() {
             どうなりたいですか？
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            選ぶだけで、あなたに合った解決策を提案します。
+            あなたに合った解決策を提案します。
           </p>
         </div>
 
@@ -193,12 +193,12 @@ function HomePageContent() {
         {activeTab === 'effects' && (
           <div className="max-w-4xl mx-auto">
             {/* 効果タブ - グリッドレイアウト */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {states.map((state, index) => (
                 <button
                   key={state.id}
                   onClick={() => handleStateSelect(state.id, state.name, 'effects', undefined, index + 1)}
-                  className="group bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200 p-3 text-left border border-gray-200 hover:scale-105 min-h-[88px] cursor-pointer"
+                  className="group bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200 p-4 sm:p-3 text-left border border-gray-200 hover:scale-105 min-h-[112px] sm:min-h-[88px] cursor-pointer"
                 >
                   <div className="flex items-center space-x-3">
                     <div className="shrink-0">
@@ -211,7 +211,7 @@ function HomePageContent() {
                       />
                     </div>
                     <div className="flex-1">
-                      <h3 className="text-sm font-semibold text-gray-900 transition-colors line-clamp-2 leading-tight">
+                      <h3 className="text-base sm:text-sm font-semibold text-gray-900 transition-colors line-clamp-2 leading-tight">
                         {state.name}
                       </h3>
                     </div>
@@ -316,7 +316,7 @@ function HomePageContent() {
 
         {/* フッター */}
         <div className="text-center mt-16 text-xs text-gray-400">
-          <p>&copy; {new Date().getFullYear()} どうなりたい？. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Dai5. All rights reserved.</p>
         </div>
       </div>
     </div>
