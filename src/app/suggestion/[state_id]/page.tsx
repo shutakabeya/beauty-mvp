@@ -147,7 +147,7 @@ function SuggestionPageContent() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 pt-20 pb-8">
         {/* ヘッダー */}
         <div className="text-center mb-8">
           {mode === 'category' && category ? (

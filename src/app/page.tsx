@@ -8,10 +8,12 @@ import { State, Product } from '@/lib/supabase'
 import { trackViewHome, trackViewEffectList, trackSelectEffect, trackClickAffiliate } from '@/lib/analytics'
 import ProductCard from '@/components/ProductCard'
 import FabCategories from '@/components/FabCategories'
+import HeroStatesCarousel from '@/components/HeroStatesCarousel'
 
 function HomePageContent() {
   const [states, setStates] = useState<State[]>([])
   const [productsByState, setProductsByState] = useState<Record<number, Product[]>>({})
+  const [heroCarouselItems, setHeroCarouselItems] = useState<Array<{ state: State; backgroundImageUrl: string }>>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [mounted, setMounted] = useState(false)
@@ -66,6 +68,45 @@ function HomePageContent() {
 
         setStates(filteredStates)
         setProductsByState(productsMap)
+
+        // ヒーローカルーセル用のデータを準備
+        // 少なくとも1件は表示するようにする
+        if (filteredStates.length > 0) {
+          // 状態の画像がある効果を優先的に選択
+          const statesWithImages = filteredStates.filter((state) => 
+            state.image_url && state.image_url.trim() !== ''
+          )
+
+          // 画像がある効果がない場合は、すべての効果を使用
+          const candidateStates = statesWithImages.length > 0 ? statesWithImages : filteredStates
+
+          // ランダムに3〜5件を選ぶ（ただし、利用可能な件数まで）
+          const availableCount = candidateStates.length
+          const minCount = Math.min(3, availableCount)
+          const maxCount = Math.min(5, availableCount)
+          const randomCount = minCount === maxCount 
+            ? minCount 
+            : Math.floor(Math.random() * (maxCount - minCount + 1)) + minCount
+          
+          const shuffled = [...candidateStates].sort(() => Math.random() - 0.5)
+          const selectedStates = shuffled.slice(0, randomCount)
+
+          // 状態の画像URLを直接使用
+          const heroItems = selectedStates.map((state) => {
+            // 状態の画像URLを使用（画像URLがない場合はplaceholderを使用）
+            const imageUrl = state.image_url?.trim() || '/images/placeholder.svg'
+            
+            console.log(`[page.tsx] State: ${state.name}, Image URL: ${imageUrl}`)
+            
+            return {
+              state,
+              backgroundImageUrl: imageUrl,
+            }
+          })
+
+          console.log(`[page.tsx] Hero carousel items created:`, heroItems.length)
+          setHeroCarouselItems(heroItems)
+        }
 
         if (filteredStates.length > 0) {
           trackViewEffectList('effects')
@@ -142,29 +183,27 @@ function HomePageContent() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            どうなりたいですか？
-          </h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            あなたに合った解決策を提案します。
-          </p>
+      {/* ヒーローカルーセル（ヘッダー直下） */}
+      {heroCarouselItems.length > 0 && (
+        <div className="w-full" style={{ marginTop: '64px' }}>
+          <HeroStatesCarousel items={heroCarouselItems} />
         </div>
+      )}
 
-        <div className="space-y-6 md:space-y-8">
+      <div className="container mx-auto px-4 pt-8 pb-8">
+        <div className="space-y-2 md:space-y-3">
           {states.map((state, index) => {
             const products = productsByState[state.id] ?? []
             return (
             <section
               key={state.id}
               aria-labelledby={`effect-${state.id}`}
-              className="py-6 md:py-8 first:pt-0 first:md:pt-0 last:pb-0 last:md:pb-0"
+              className="pt-4 pb-2 md:pt-5 md:pb-2 first:pt-0 first:md:pt-0 last:pb-0 last:md:pb-0"
             >
               <div className="flex items-center justify-between gap-4">
                 <h2
                   id={`effect-${state.id}`}
-                  className="text-xl md:text-2xl font-semibold text-gray-900"
+                  className="text-2xl md:text-3xl font-semibold text-gray-900"
                 >
                   {state.name}
                 </h2>
@@ -178,7 +217,7 @@ function HomePageContent() {
               </div>
 
               <div className="mt-4">
-                <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory [-webkit-overflow-scrolling:touch]">
+                <div className="flex gap-4 overflow-x-auto pb-2 snap-x snap-mandatory [-webkit-overflow-scrolling:touch]">
                   {products.map((product) => (
                     <div
                       key={product.id}
