@@ -11,8 +11,8 @@ const notoSansJP = Noto_Sans_JP({
 });
 
 export const metadata: Metadata = {
-  title: "どうなりたい？ | 効果で選ぶ美容プラットフォーム",
-  description: "なりたい状態はありますか？対処したい悩みはありますか？「どうなりたい？」は、肌の赤み・青ひげ・毛穴などを目的から探せる、効果ドリブンの美容プラットフォームです。",
+  title: "ESSECE | 効果で選ぶ美容プラットフォーム",
+  description: "ESSECE（エセス）はメンズ向けの美容プラットフォームです。肌の赤み・青ひげ・毛穴など、男性特有の美容悩みを「どうなりたい？」から探して、目的に合ったスキンケア商品を見つけられます。",
   icons: {
     icon: [
       { url: '/favicon.ico', sizes: 'any' },

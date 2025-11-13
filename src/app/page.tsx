@@ -190,7 +190,7 @@ function HomePageContent() {
         </div>
       )}
 
-      <div className="container mx-auto px-4 pt-8 pb-8">
+      <div className="container mx-auto px-4 pt-4 pb-8">
         <div className="space-y-2 md:space-y-3">
           {states.map((state, index) => {
             const products = productsByState[state.id] ?? []
@@ -198,7 +198,7 @@ function HomePageContent() {
             <section
               key={state.id}
               aria-labelledby={`effect-${state.id}`}
-              className="pt-4 pb-2 md:pt-5 md:pb-2 first:pt-0 first:md:pt-0 last:pb-0 last:md:pb-0"
+              className="pt-2 pb-1 md:pt-3 md:pb-1 first:pt-0 first:md:pt-0 last:pb-0 last:md:pb-0"
             >
               <div className="flex items-center justify-between gap-4">
                 <h2

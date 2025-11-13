@@ -82,7 +82,7 @@ export default function HeroStatesCarousel({ items }: HeroStatesCarouselProps) {
 
   return (
     <div
-      className="relative w-full h-64 md:h-80 lg:h-96 overflow-hidden bg-transparent"
+      className="relative w-full h-48 md:h-56 lg:h-64 overflow-hidden bg-transparent"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onFocus={handleFocus}
