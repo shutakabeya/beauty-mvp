@@ -148,17 +148,6 @@ function CategoriesPageContent() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 pt-20 pb-8">
-        <div className="mb-6">
-          <Link
-            href="/"
-            className="inline-flex items-center text-blue-600 hover:text-blue-800 text-sm font-medium mb-4 cursor-pointer transition-colors"
-          >
-            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-            </svg>
-            トップページに戻る
-          </Link>
-        </div>
         <div className="text-center mb-8">
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">カテゴリ</h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
@@ -186,15 +175,6 @@ function CategoriesPageContent() {
           <div className="max-w-4xl mx-auto">
             <div className="mb-6">
               <div className="flex flex-col gap-2 mb-4">
-                <Link
-                  href="/"
-                  className="inline-flex items-center text-blue-600 hover:text-blue-800 text-sm font-medium cursor-pointer transition-colors"
-                >
-                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                  </svg>
-                  トップページに戻る
-                </Link>
                 <button
                   onClick={handleBackToCategories}
                   className="text-blue-600 hover:text-blue-800 text-sm font-medium cursor-pointer inline-flex items-center transition-colors"
